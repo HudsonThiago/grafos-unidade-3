@@ -1,3 +1,5 @@
+import copy
+
 class grafo:
     def lerArquivo(self, file):
         with open(file, 'r') as file:
@@ -17,12 +19,12 @@ class grafo:
                             self.m += 1
     
     def cobertura(self, subconjunto):
-        vertices = self.listaAdj
+        vertices = copy.deepcopy(self.listaAdj)
         for vertice in subconjunto:
             if vertice in vertices:
                 for v in vertices[vertice]:
-                    if v in vertice:
-                        del vertice[v]
+                    if v in vertices:
+                        del vertices[v]
                 del vertices[vertice]
         if len(vertices) == 0:
             return True
@@ -32,15 +34,15 @@ class grafo:
 import itertools
 
 class coberturaMinimaVertice:
-    def guloso(self, graph):
-        for i in range(graph.n):
-            for subset in itertools.combinations(graph.vertices, i):
-                if graph.cobertura(subset):
-                    result = "subset: {subset}"
-                    return result
+    def guloso(self, grafo):
+        for i in range(1, grafo.n + 1):
+            for subset in itertools.combinations(grafo.vertices, i):
+                  if grafo.cobertura(subset):
+                      result = f"subset: {subset}"
+                      return result
 
 g1 = grafo()
-g1.lerArquivo("./casos-de-uso/grafo1.txt")
+g1.lerArquivo("./casos-de-uso/grafo2.txt")
 
 alg = coberturaMinimaVertice()
-alg.guloso(g1)
+print(alg.guloso(g1))
