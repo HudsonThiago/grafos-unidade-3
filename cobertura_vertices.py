@@ -5,9 +5,8 @@ class grafo:
         with open(file, 'r') as file:
             lista = [[int(num) for num in line.split(' ')] for line in file]
 
-            self.n = len(lista)
             self.arestas = set()
-            self.vertices = set(range(self.n))
+            self.vertices = set(range(len(lista)))
             self.listaAdj = {vertex : set() for vertex in self.vertices}
 
             for i in self.vertices:
@@ -21,6 +20,8 @@ class grafo:
     
     def cobertura(self, subconjunto):
         vertices = self.listaAdj.copy()
+        if subconjunto == None:
+            return True
         for vertice in subconjunto:
             if vertice in vertices:
                 for v in vertices[vertice]:
@@ -34,8 +35,8 @@ class grafo:
 
 def removeVertice(grafo, vertice):
     grafoRetorno = copy.copy(grafo)
-    grafoRetorno.n -= 1
-    grafoRetorno.vertices.remove(vertice)
+    if vertice in grafoRetorno.vertices:    
+        grafoRetorno.vertices.remove(vertice)
     arestas = set()
     for aresta in grafoRetorno.arestas:
         if not vertice in aresta:
@@ -49,7 +50,7 @@ def removeVertice(grafo, vertice):
     return grafoRetorno  
 
 def guloso(grafo):
-    for i in range(1, grafo.n):
+    for i in range(1, len(grafo.vertices)):
         for subconjunto in itertools.combinations(grafo.vertices, i):
             if grafo.cobertura(subconjunto):
                 resultado = f"cobertura mínima de vértice: \n"
@@ -60,22 +61,20 @@ def guloso(grafo):
 
 def recursivo(grafo, k):
     if k == 0:
+        return set()
+    if len(grafo.vertices) == 0:
         return None
-    else:
-        aresta = next(iter(grafo.arestas))
-        u = aresta[0]
-        g1 = removeVertice(grafo, u)
-        cobertura1 = recursivo(g1, k - 1)
-        if g1.cobertura(cobertura1):
-            cobertura1.add(u)
-            return cobertura1
-        v = aresta[1]
-        g2 = removeVertice(grafo, v)
-        cobertura2 = recursivo(g2, k - 1)
-        if g2.cobertura(cobertura2):
-            cobertura2.add(v)
-            return cobertura2
-        return None
+    for edge in grafo.arestas:
+        if removeVertice(grafo, edge[0]).cobertura(recursivo(removeVertice(grafo, edge[0]), k - 1)):
+            if grafo.vertices:    
+                print(grafo.vertices)
+            return grafo.vertices
+        elif removeVertice(grafo, edge[1]).cobertura(recursivo(removeVertice(grafo, edge[1]), k - 1)):
+            if grafo.vertices:
+                print(grafo.vertices)
+            return grafo.vertices
+        else:
+            return None
 
 g1 = grafo()
 g1.lerArquivo("../grafos-unidade-3/casos de uso/grafo2.txt")
